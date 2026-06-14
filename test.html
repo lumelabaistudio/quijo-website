@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quijo — Try It Now</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0e0e0e;
+    --white: #ffffff;
+    --accent: #6C47FF;
+    --accent-light: #ede9ff;
+    --success: #1a7a3a;
+    --success-bg: #e6f4ea;
+    --muted: #666;
+    --border: #e5e5e5;
+    --card-bg: #fafafa;
+    --error: #c0392b;
+    --error-bg: #fdecea;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--black);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--black);
+    text-decoration: none;
+  }
+  .nav-tag {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 64px 24px 40px;
+  }
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .hero h1 span {
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 420px;
+    margin: 0 auto 8px;
+    line-height: 1.6;
+  }
+  .hero-note {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 0;
+  }
+
+  /* ── MAIN CARD ── */
+  .card-wrap {
+    max-width: 620px;
+    margin: 32px auto 0;
+    padding: 0 24px 80px;
+  }
+  .card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1.5px solid var(--border);
+  }
+  .tab {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--card-bg);
+    border: none;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab:first-child { border-right: 1.5px solid var(--border); }
+  .tab.active {
+    background: var(--white);
+    color: var(--black);
+    font-weight: 700;
+  }
+  .tab-icon { margin-right: 6px; }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 28px; }
+  .panel.active { display: block; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--card-bg);
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .upload-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .upload-zone h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .upload-zone p {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .file-selected {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: var(--success-bg);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--success);
+  }
+  .file-selected.visible { display: flex; }
+
+  /* ── LINKEDIN PANEL ── */
+  .linkedin-intro {
+    background: #f0f7ff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #1a5276;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .linkedin-intro strong { display: block; margin-bottom: 4px; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--black);
+  }
+  input[type="text"], input[type="url"], select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--black);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 16px;
+  }
+  input[type="text"]:focus, input[type="url"]:focus, select:focus {
+    border-color: var(--accent);
+  }
+
+  /* ── SUBMIT ── */
+  .btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--black);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 8px;
+  }
+  .btn-submit:hover { opacity: 0.85; }
+  .btn-submit:active { transform: scale(0.99); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ── LOADING ── */
+  .loading {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+  }
+  .loading.visible { display: block; }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-step {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .loading-step.done { color: var(--success); }
+  .loading-step.done::before { content: "✓ "; }
+  .loading-step.active { color: var(--black); font-weight: 600; }
+
+  /* ── ERROR ── */
+  .error-box {
+    display: none;
+    background: var(--error-bg);
+    border: 1px solid #f5c6cb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--error);
+  }
+  .error-box.visible { display: block; }
+
+  /* ── RESULTS ── */
+  .results { display: none; padding: 0 24px 28px; }
+  .results.visible { display: block; }
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .results-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .results-header .credits {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .profile-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+  .job-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+  .job-card:hover { border-color: var(--accent); }
+  .job-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .job-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .match-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .match-high { background: var(--success-bg); color: var(--success); }
+  .match-mid  { background: #fff8e1; color: #7d5a00; }
+  .match-low  { background: #f3f3f3; color: #555; }
+  .job-meta {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .job-meta span { margin-right: 12px; }
+  .job-reason {
+    font-size: 13px;
+    color: #444;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+  .apply-link {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 7px 16px;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+  .apply-link:hover {
+    background: var(--accent);
+    color: var(--white);
+  }
+  .results-footer {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8f6ff;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .results-footer a {
+    color: var(--accent);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .reset-btn {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reset-btn:hover { color: var(--black); }
+
+  @media (max-width: 480px) {
+    nav { padding: 16px 20px; }
+    .hero { padding: 40px 20px 24px; }
+    .card-wrap { padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="wordmark">QUIJO</a>
+  <span class="nav-tag">Beta — Try It Free</span>
+</nav>
+
+<div class="hero">
+  <p class="hero-eyebrow">Live AI Job Matching</p>
+  <h1>Your resume.<br><span>Top matches.</span> Instantly.</h1>
+  <p class="hero-sub">Upload your resume PDF and get AI-matched job results from across the web — in under 30 seconds.</p>
+  <p class="hero-note">No signup. No spam. Completely free to try.</p>
+</div>
+
+<div class="card-wrap">
+  <div class="card" id="main-card">
+
+    <!-- TABS -->
+    <div class="tabs" id="tabs-bar">
+      <button class="tab active" onclick="switchTab('pdf')" id="tab-pdf">
+        <span class="tab-icon">📄</span> Upload Resume PDF
+      </button>
+      <button class="tab" onclick="switchTab('linkedin')" id="tab-linkedin">
+        <span class="tab-icon">🔗</span> LinkedIn Profile
+      </button>
+    </div>
+
+    <!-- PDF PANEL -->
+    <div class="panel active" id="panel-pdf">
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="resume-file" accept=".pdf" onchange="onFileSelected(this)">
+        <span class="upload-icon">📎</span>
+        <h3>Drop your resume here</h3>
+        <p>PDF only · Max 5MB</p>
+      </div>
+      <div class="file-selected" id="file-selected">
+        <span>✅</span>
+        <span id="file-name">resume.pdf</span>
+      </div>
+      <div style="margin-top:20px">
+        <label for="city-pdf">Your city</label>
+        <select id="city-pdf">
+          <option value="Delhi">Delhi / NCR</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Bangalore">Bangalore</option>
+          <option value="Hyderabad">Hyderabad</option>
+          <option value="Pune">Pune</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Gurgaon">Gurgaon</option>
+          <option value="Noida">Noida</option>
+        </select>
+      </div>
+      <button class="btn-submit" id="btn-pdf" onclick="submitPDF()">Find my matches →</button>
+      <div class="error-box" id="error-pdf"></div>
+    </div>
+
+    <!-- LINKEDIN PANEL -->
+    <div class="panel" id="panel-linkedin">
+      <div class="linkedin-intro">
+        <strong>How this works</strong>
+        Paste your public LinkedIn URL. We'll extract your profile details and find live job matches based on your experience and skills.
+      </div>
+      <label for="linkedin-url">Your LinkedIn URL</label>
+      <input type="url" id="linkedin-url" placeholder="https://linkedin.com/in/your-name">
+      <label for="city-li">Your city</label>
+      <select id="city-li">
+        <option value="Delhi">Delhi / NCR</option>
+        <option value="Mumbai">Mumbai</option>
+        <option value="Bangalore">Bangalore</option>
+        <option value="Hyderabad">Hyderabad</option>
+        <option value="Pune">Pune</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Kolkata">Kolkata</option>
+        <option value="Gurgaon">Gurgaon</option>
+        <option value="Noida">Noida</option>
+      </select>
+      <button class="btn-submit" id="btn-li" onclick="submitLinkedIn()">Find my matches →</button>
+      <div class="error-box" id="error-li"></div>
+    </div>
+
+    <!-- LOADING STATE (shown over both panels) -->
+    <div class="loading" id="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-step" id="step-1">Reading your resume</div>
+      <div class="loading-step" id="step-2">Extracting skills and experience</div>
+      <div class="loading-step" id="step-3">Searching live job listings</div>
+      <div class="loading-step" id="step-4">AI scoring your matches</div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results" id="results-section">
+      <div class="results-header">
+        <h2>Top matches for you 👇</h2>
+        <span class="credits" id="credits-label"></span>
+      </div>
+      <div class="profile-pill" id="profile-pills"></div>
+      <div id="job-cards"></div>
+      <div class="results-footer">
+        Want these results on WhatsApp? <a href="https://wa.me/918796757406">Message Quijo →</a><br>
+        <button class="reset-btn" onclick="resetForm()">← Try with a different resume</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = 'https://web-production-7c5a3.up.railway.app';
+const KEY = 'quijo2026';
+
+// ── Page-level access gate ───────────────────────────────────
+(function() {
+  const urlKey = new URLSearchParams(window.location.search).get('key');
+  if (urlKey !== KEY) {
+    document.body.innerHTML = `
+      <div style="font-family:-apple-system,sans-serif;display:flex;align-items:center;
+        justify-content:center;min-height:100vh;flex-direction:column;gap:16px;color:#111">
+        <div style="font-size:32px">🔒</div>
+        <div style="font-size:18px;font-weight:700">Access restricted</div>
+        <div style="font-size:14px;color:#666">This page is for internal testing only.</div>
+      </div>`;
+  }
+})();
+
+// ── Tab switching ────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('panel-pdf').classList.toggle('active', tab === 'pdf');
+  document.getElementById('panel-linkedin').classList.toggle('active', tab === 'linkedin');
+  document.getElementById('tab-pdf').classList.toggle('active', tab === 'pdf');
+  document.getElementById('tab-linkedin').classList.toggle('active', tab === 'linkedin');
+}
+
+// ── File selection ───────────────────────────────────────────
+function onFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-selected').classList.add('visible');
+}
+
+// Drag-and-drop
+const zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') {
+    const input = document.getElementById('resume-file');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    onFileSelected(input);
+  }
+});
+
+// ── Loading animation ────────────────────────────────────────
+let stepInterval;
+function startLoading(isLinkedIn) {
+  const steps = ['step-1','step-2','step-3','step-4'];
+  const labels = isLinkedIn
+    ? ['Reading your LinkedIn profile','Extracting skills and experience','Searching live job listings','AI scoring your matches']
+    : ['Reading your resume','Extracting skills and experience','Searching live job listings','AI scoring your matches'];
+
+  steps.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.textContent = labels[i];
+    el.className = 'loading-step';
+  });
+
+  document.getElementById('tabs-bar').style.display = 'none';
+  document.getElementById('panel-pdf').style.display = 'none';
+  document.getElementById('panel-linkedin').style.display = 'none';
+  document.getElementById('loading-state').classList.add('visible');
+
+  let current = 0;
+  document.getElementById(steps[0]).classList.add('active');
+
+  stepInterval = setInterval(() => {
+    if (current < steps.length - 1) {
+      document.getElementById(steps[current]).classList.remove('active');
+      document.getElementById(steps[current]).classList.add('done');
+      current++;
+      document.getElementById(steps[current]).classList.add('active');
+    }
+  }, 5000);
+}
+
+function stopLoading() {
+  clearInterval(stepInterval);
+  document.getElementById('loading-state').classList.remove('visible');
+}
+
+// ── Submit PDF ───────────────────────────────────────────────
+async function submitPDF() {
+  const file = document.getElementById('resume-file').files[0];
+  const city = document.getElementById('city-pdf').value;
+  const errEl = document.getElementById('error-pdf');
+  errEl.classList.remove('visible');
+
+  if (!file) {
+    showError('error-pdf', 'Please select a PDF file first.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showError('error-pdf', 'File is too large. Please use a PDF under 5MB.');
+    return;
+  }
+
+  document.getElementById('btn-pdf').disabled = true;
+  startLoading(false);
+
+  try {
+    // Step 1: Extract text from PDF client-side using PDF.js
+    const text = await extractPDFText(file);
+    if (!text || text.trim().length < 100) {
+      stopLoading();
+      showError('error-pdf', 'Could not read your PDF. Please make sure it\'s a text-based PDF (not a scanned image).');
+      resetLoadingUI();
+      return;
+    }
+
+    // Step 2: Call backend
+    const params = new URLSearchParams({ role: 'auto', city, skills: '', years: 0, resume_text: text.slice(0, 4000), key: KEY });
+    const res = await fetch(`${API}/test-match-text?${params}`);
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const html = await res.text();
+    stopLoading();
+    parseAndShowResults(html, text);
+  } catch(e) {
+    stopLoading();
+    showError('error-pdf', 'Something went wrong. Please try again in a moment.');
+    resetLoadingUI();
+    document.getElementById('btn-pdf').disabled = false;
+  }
+}
+
+// ── Submit LinkedIn ──────────────────────────────────────────
+async function submitLinkedIn() {
+  const url = document.getElementById('linkedin-url').value.trim();
+  const city = document.getElementById('city-li').value;
+  const errEl = document.getElementById('error-li');
+  errEl.classList.remove('visible');
+
+  if (!url || !url.includes('linkedin.com/in/')) {
+    showError('error-li', 'Please enter a valid LinkedIn profile URL (linkedin.com/in/your-name).');
+    return;
+  }
+
+  document.getElementById('btn-li').disabled = true;
+  startLoading(true);
+
+  try {
+    const params = new URLSearchParams({ linkedin_url: url, city, key: KEY });
+    const res = await fetch(`${API}/test-match-linkedin?${params}`);
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const html = await res.text();
+    stopLoading();
+    parseAndShowResults(html, null);
+  } catch(e) {
+    stopLoading();
+    showError('error-li', 'Could not fetch your LinkedIn profile. Make sure your profile is public and try again.');
+    resetLoadingUI();
+    document.getElementById('btn-li').disabled = false;
+  }
+}
+
+// ── PDF text extraction (PDF.js) ─────────────────────────────
+async function extractPDFText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(item => item.str).join(' ') + '\n';
+        }
+        resolve(text);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ── Parse results from backend HTML ─────────────────────────
+function parseAndShowResults(html, resumeText) {
+  // Parse the table rows from the /test-match HTML response
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const rows = doc.querySelectorAll('tbody tr');
+
+  if (!rows.length) {
+    showError('error-pdf', 'No job matches found. Try adjusting your city.');
+    resetLoadingUI();
+    return;
+  }
+
+  // Extract profile from "Profile used" div if present
+  const profileDiv = doc.querySelector('.profile');
+  let pills = '';
+  if (profileDiv) {
+    const spans = profileDiv.querySelectorAll('span');
+    spans.forEach(s => {
+      pills += `<span class="pill">${s.textContent.trim()}</span>`;
+    });
+  }
+
+  const jobs = [];
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 7) {
+      const score = parseInt(cells[4].textContent) || 0;
+      jobs.push({
+        title  : cells[0].textContent.trim(),
+        company: cells[1].textContent.trim(),
+        location: cells[2].textContent.trim(),
+        salary : cells[3].textContent.trim(),
+        score,
+        reason : cells[5].textContent.trim(),
+        url    : cells[6].querySelector('a')?.href || '#',
+      });
+    }
+  });
+
+  renderResults(jobs, pills);
+}
+
+function renderResults(jobs, pills) {
+  document.getElementById('profile-pills').innerHTML = pills;
+  document.getElementById('credits-label').textContent = '3 free searches';
+
+  const container = document.getElementById('job-cards');
+  container.innerHTML = '';
+
+  jobs.forEach(job => {
+    const badgeClass = job.score >= 80 ? 'match-high' : job.score >= 65 ? 'match-mid' : 'match-low';
+    const card = document.createElement('div');
+    card.className = 'job-card';
+    card.innerHTML = `
+      <div class="job-header">
+        <div class="job-title">${job.title}</div>
+        <span class="match-badge ${badgeClass}">${job.score}% match</span>
+      </div>
+      <div class="job-meta">
+        <span>🏢 ${job.company}</span>
+        <span>📍 ${job.location}</span>
+        <span>💰 ${job.salary}</span>
+      </div>
+      <div class="job-reason">${job.reason}</div>
+      <a class="apply-link" href="${job.url}" target="_blank" rel="noopener">Apply →</a>
+    `;
+    container.appendChild(card);
+  });
+
+  document.getElementById('results-section').classList.add('visible');
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+
+function resetLoadingUI() {
+  document.getElementById('tabs-bar').style.display = 'grid';
+  const active = document.getElementById('tab-pdf').classList.contains('active') ? 'pdf' : 'linkedin';
+  document.getElementById(`panel-${active}`).style.display = 'block';
+}
+
+function resetForm() {
+  document.getElementById('results-section').classList.remove('visible');
+  document.getElementById('tabs-bar').style.display = 'grid';
+  document.getElementById('panel-pdf').style.display = 'block';
+  document.getElementById('panel-pdf').classList.add('active');
+  document.getElementById('panel-linkedin').classList.remove('active');
+  document.getElementById('tab-pdf').classList.add('active');
+  document.getElementById('tab-linkedin').classList.remove('active');
+  document.getElementById('resume-file').value = '';
+  document.getElementById('file-selected').classList.remove('visible');
+  document.getElementById('btn-pdf').disabled = false;
+  document.getElementById('btn-li').disabled = false;
+}
+</script>
+
+<!-- PDF.js for client-side PDF text extraction -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+
+</body>
+</html>
