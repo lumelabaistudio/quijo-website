@@ -506,6 +506,53 @@
       }
     }
 
+    .btn-hero-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--orange);
+      color: white;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 17px;
+      padding: 18px 36px;
+      border-radius: 14px;
+      text-decoration: none;
+      width: 100%;
+      letter-spacing: -0.2px;
+      transition: background 0.2s, transform 0.15s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-hero-primary:hover { background: var(--orange-dark); transform: translateY(-2px); }
+
+    .hero-cta-note {
+      font-size: 13px;
+      color: rgba(255,255,255,0.32);
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* ── WAITLIST PERKS ── */
+    .waitlist-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 340px;
+      margin: 0 auto 36px;
+      text-align: left;
+    }
+
+    .waitlist-perk-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.65);
+    }
+
     .price-card {
       background: var(--white);
       border: 1.5px solid var(--gray-border);
@@ -846,12 +893,6 @@
     }
 
     /* ── RESPONSIVE ── */
-    @media (min-width: 640px) {
-      .hero-actions {
-        flex-direction: row;
-        max-width: 480px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -866,17 +907,14 @@
   <section class="hero">
     <div class="hero-badge">
       <span class="hero-badge-dot"></span>
-      Now in beta — Join the waitlist
+      🎁 Waitlist perk · 5 free AI job searches at launch
     </div>
     <h1>Jobs.<br><span class="accent">Instantly.</span></h1>
     <p class="hero-sub">Send your resume on WhatsApp. Get AI-matched jobs in 30 seconds. No job boards. No noise. Just live results.</p>
 
     <div class="hero-actions">
-      <a class="btn-whatsapp" href="https://wa.me/918796757406?text=Hi%20Quijo%2C%20here%20is%20my%20resume" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Try on WhatsApp
-      </a>
-      <a class="btn-waitlist" href="#waitlist">Join Waitlist →</a>
+      <a class="btn-hero-primary" href="#waitlist">Get 5 Free AI Job Searches →</a>
+      <p class="hero-cta-note">Free · No credit card · Waitlist members only</p>
     </div>
 
     <div class="hero-proof">
@@ -918,7 +956,7 @@
   <!-- TRUST BAR -->
   <div class="trust-bar">
     <div class="trust-item"><span class="trust-icon">✓</span> Live jobs only — no stale listings</div>
-    <div class="trust-item"><span class="trust-icon">✓</span> Live jobs only — updated every 6 hours</div>
+    <div class="trust-item"><span class="trust-icon">✓</span> AI-matched to your resume — not a generic search</div>
     <div class="trust-item"><span class="trust-icon">✓</span> Works on WhatsApp — no app to install</div>
   </div>
 
@@ -1037,16 +1075,17 @@
     <div class="pricing-grid">
       <!-- Free -->
       <div class="price-card fade-up">
-        <div class="price-tier">Free</div>
+        <div class="price-badge" style="background: #1a1a1a; border: 1px solid rgba(255,69,0,0.35); color: #FF7040; font-size: 10px; letter-spacing: 0.5px;">🎁 WAITLIST PERK</div>
+        <div class="price-tier">Early Access</div>
         <div class="price-amount">₹0</div>
-        <div class="price-period">Forever free</div>
+        <div class="price-period">5 free searches — waitlist only</div>
         <ul class="price-features">
-          <li><span class="price-check">✓</span> 3 AI interactions (lifetime)</li>
-          <li><span class="price-check">✓</span> Resume parsing</li>
-          <li><span class="price-check">✓</span> Top 3 matched jobs</li>
+          <li><span class="price-check">✓</span> 5 free AI job searches</li>
+          <li><span class="price-check">✓</span> Resume parsing included</li>
+          <li><span class="price-check">✓</span> Top 3 matched jobs per search</li>
           <li><span class="price-check">✓</span> Works on WhatsApp</li>
         </ul>
-        <a class="price-cta price-cta-outline" href="https://wa.me/918796757406" target="_blank">Try for free</a>
+        <a class="price-cta price-cta-outline" href="#waitlist">Join Waitlist →</a>
       </div>
 
       <!-- Pay per use -->
@@ -1134,7 +1173,7 @@
             When will it be available?
             <span class="faq-icon">+</span>
           </button>
-          <div class="faq-a">We're currently in closed beta. Join the waitlist and you'll be among the first to get access. Beta users will also get 5 free bonus prompts on signup.</div>
+          <div class="faq-a">We're currently in closed beta. Join the waitlist and you'll be among the first to get access. Waitlist members start with 5 free AI job searches at launch — no credit card needed.</div>
         </div>
       </div>
     </div>
@@ -1142,9 +1181,15 @@
 
   <!-- WAITLIST -->
   <section class="waitlist-section" id="waitlist">
-    <div class="section-label" style="color: rgba(255,255,255,0.4);">Early access</div>
-    <h2 class="section-title fade-up">Be first in line.</h2>
-    <p class="section-desc fade-up">Join the waitlist. Get early access + 5 free bonus prompts when we launch.</p>
+    <div class="section-label" style="color: rgba(255,255,255,0.4);">Early access · Free</div>
+    <h2 class="section-title fade-up">Get 5 free AI job searches.</h2>
+    <p class="section-desc fade-up">Join the waitlist. Be among the first to try Quijo — your 5 searches are ready the moment we launch.</p>
+
+    <div class="waitlist-perks fade-up">
+      <div class="waitlist-perk-item">🎁 &nbsp;5 free AI job searches at launch</div>
+      <div class="waitlist-perk-item">⚡ &nbsp;Priority access before public launch</div>
+      <div class="waitlist-perk-item">🔕 &nbsp;No spam — only your access link</div>
+    </div>
 
     <div class="tally-wrap">
       <!-- Tally waitlist embed — form ID: kdz0dJ -->
@@ -1160,14 +1205,6 @@
         style="border:none; width:100%; min-height:500px; background:transparent;"
       ></iframe>
       <p class="waitlist-privacy">No spam, ever. We'll only WhatsApp you with your access link.</p>
-    </div>
-
-    <div class="whatsapp-alt">
-      <p>Or jump straight in on WhatsApp</p>
-      <a class="btn-wa-large" href="https://wa.me/918796757406?text=Hi%20Quijo%2C%20I%20want%20to%20search%20for%20jobs" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        Chat on WhatsApp
-      </a>
     </div>
   </section>
 
