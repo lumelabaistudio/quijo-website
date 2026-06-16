@@ -1371,7 +1371,12 @@
           layout: 'modal',
           width: 480,
           onSubmit: function() {
-            showWaitlistSuccess();
+            // Close Tally's own "Thanks for completing this form" screen
+            // immediately — then show our custom success card underneath
+            setTimeout(function() {
+              Tally.closePopup('kdz0dJ');
+              showWaitlistSuccess();
+            }, 120);
           }
         });
       } else {
