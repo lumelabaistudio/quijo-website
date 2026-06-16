@@ -742,54 +742,41 @@
 
     .waitlist-section .section-desc { color: rgba(255,255,255,0.5); }
 
-    .tally-wrap {
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .tally-wrap iframe {
-      background: transparent !important;
-      background-color: transparent !important;
-    }
-
     .waitlist-privacy {
       font-size: 12px;
-      color: rgba(255,255,255,0.25);
-      margin-top: 12px;
+      color: rgba(255,255,255,0.22);
+      margin-top: 14px;
       text-align: center;
     }
 
-    .whatsapp-alt {
-      margin-top: 32px;
-      padding-top: 32px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+    /* ── WAITLIST CTA BUTTON ── */
+    .waitlist-trigger {
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
     }
 
-    .whatsapp-alt p {
-      font-size: 14px;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 14px;
-    }
-
-    .btn-wa-large {
+    .btn-waitlist-cta {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      background: var(--green);
+      background: var(--orange);
       color: white;
       font-family: var(--font-body);
-      font-weight: 700;
-      font-size: 16px;
-      padding: 16px 32px;
+      font-weight: 600;
+      font-size: 18px;
+      padding: 20px 44px;
       border-radius: 14px;
-      text-decoration: none;
       border: none;
       cursor: pointer;
+      width: 100%;
+      max-width: 380px;
+      letter-spacing: -0.2px;
       transition: background 0.2s, transform 0.15s;
+      -webkit-appearance: none;
     }
 
-    .btn-wa-large:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .btn-waitlist-cta:hover { background: var(--orange-dark); transform: translateY(-2px); }
 
     /* ── FOOTER ── */
     footer {
@@ -1305,20 +1292,8 @@
       <div class="waitlist-perk-item">🔕 &nbsp;No spam — only your access link</div>
     </div>
 
-    <div class="tally-wrap">
-      <!-- Tally waitlist embed — form ID: kdz0dJ -->
-      <iframe
-        id="tally-iframe"
-        src="https://tally.so/embed/kdz0dJ?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-        loading="lazy"
-        width="100%"
-        height="500"
-        frameborder="0"
-        marginheight="0"
-        marginwidth="0"
-        title="Join the Quijo waitlist"
-        style="border:none; width:100%; min-height:500px; background:transparent;"
-      ></iframe>
+    <div id="waitlist-form-trigger" class="waitlist-trigger">
+      <button class="btn-waitlist-cta" onclick="openWaitlistForm()">Join the Waitlist — it's free →</button>
       <p class="waitlist-privacy">No spam, ever. We'll only WhatsApp you with your access link.</p>
     </div>
 
@@ -1375,37 +1350,39 @@
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    // ── WAITLIST SUCCESS STATE ──
-    // Tally fires a postMessage when the form is submitted.
-    // We intercept it, hide the iframe, and show our own success card.
+    // ── WAITLIST ──
     function showWaitlistSuccess() {
-      const wrap   = document.querySelector('.tally-wrap');
-      const perks  = document.querySelector('.waitlist-perks');
-      const desc   = document.querySelector('#waitlist .section-desc');
+      const trigger = document.getElementById('waitlist-form-trigger');
+      const perks   = document.querySelector('.waitlist-perks');
+      const desc    = document.querySelector('#waitlist .section-desc');
       const success = document.getElementById('waitlist-success');
-      if (wrap)  wrap.style.display  = 'none';
-      if (perks) perks.style.display = 'none';
-      if (desc)  desc.style.display  = 'none';
+      if (trigger) trigger.style.display = 'none';
+      if (perks)   perks.style.display   = 'none';
+      if (desc)    desc.style.display    = 'none';
       if (success) {
         success.style.display = 'block';
         setTimeout(() => success.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
       }
     }
 
-    window.addEventListener('message', function(e) {
-      let d = e.data;
-      if (!d) return;
-      if (typeof d === 'string') {
-        try { d = JSON.parse(d); } catch(x) { return; }
+    function openWaitlistForm() {
+      if (typeof Tally !== 'undefined' && Tally.openPopup) {
+        Tally.openPopup('kdz0dJ', {
+          layout: 'modal',
+          width: 480,
+          onSubmit: function() {
+            showWaitlistSuccess();
+          }
+        });
+      } else {
+        // embed.js not yet loaded — open in new tab as fallback
+        window.open('https://tally.so/r/kdz0dJ', '_blank');
       }
-      if (d && (
-        d.type === 'TallyFormSubmitted' ||
-        d.type === 'form-submitted'     ||
-        d.type === 'tally-form-submitted' ||
-        (d.formId && d.formId === 'kdz0dJ')
-      )) {
-        showWaitlistSuccess();
-      }
+    }
+
+    // Safety net: also catch the DOM event fired by embed.js
+    window.addEventListener('TallyFormSubmitted', function() {
+      showWaitlistSuccess();
     });
   </script>
 
