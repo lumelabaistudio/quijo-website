@@ -22,6 +22,9 @@
     --card-bg: #fafafa;
     --error: #c0392b;
     --error-bg: #fdecea;
+    --warn: #7d5a00;
+    --warn-bg: #fff8e1;
+    --warn-border: #f3d98a;
   }
 
   body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); min-height: 100vh; }
@@ -85,11 +88,15 @@
   .results.visible { display: block; }
 
   .results-header { padding: 20px 24px 0; }
-  .results-header h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+  .results-header h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .demand-signal { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 
   .profile-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; padding: 0 24px; }
   .pill { font-size: 12px; font-weight: 500; padding: 4px 11px; border-radius: 20px; background: var(--accent-light); color: var(--accent); }
   .pill.skills-pill { background: #f0f0f0; color: #444; max-width: 100%; white-space: normal; line-height: 1.4; }
+
+  /* ── WEAK MATCH BANNER ── */
+  .weak-match-banner { margin: 0 24px 16px; padding: 12px 14px; background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 10px; font-size: 13px; color: var(--warn); line-height: 1.5; }
 
   /* ── FILTER BAR ── */
   .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 24px 16px; align-items: center; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
@@ -121,11 +128,13 @@
   .apply-link { display: inline-block; font-size: 13px; font-weight: 700; color: var(--accent); text-decoration: none; padding: 6px 14px; border: 1.5px solid var(--accent); border-radius: 8px; transition: all 0.15s; }
   .apply-link:hover { background: var(--accent); color: var(--white); }
 
-  /* ── SHOW MORE ── */
+  /* ── POOL STATUS (more like these / widen search / exhausted) ── */
   .show-more-wrap { padding: 4px 24px 16px; text-align: center; }
+  .show-more-wrap p { font-size: 13px; color: #888; margin-bottom: 10px; line-height: 1.5; }
   .btn-show-more { width: 100%; padding: 12px; background: var(--white); color: var(--black); border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
   .btn-show-more:hover { border-color: var(--accent); color: var(--accent); }
   .btn-show-more:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-widen { border-color: var(--accent); color: var(--accent); }
 
   /* ── RESULTS FOOTER ── */
   .results-footer { margin: 8px 24px 24px; padding: 14px 16px; background: #f8f6ff; border-radius: 10px; font-size: 13px; color: #555; text-align: center; line-height: 1.6; }
@@ -230,9 +239,12 @@
 
       <div class="results-header">
         <h2>Top matches for you 👇</h2>
+        <p class="demand-signal" id="demand-signal"></p>
       </div>
 
       <div class="profile-pills" id="profile-pills"></div>
+
+      <div class="weak-match-banner" id="weak-match-banner" style="display:none"></div>
 
       <!-- FILTER BAR -->
       <div class="filter-bar">
@@ -252,10 +264,8 @@
       <!-- JOB CARDS -->
       <div class="job-list" id="job-cards"></div>
 
-      <!-- SHOW MORE -->
-      <div class="show-more-wrap" id="show-more-wrap" style="display:none">
-        <button class="btn-show-more" id="btn-show-more" onclick="showMore()">Show more matches ↓</button>
-      </div>
+      <!-- POOL STATUS: more like these / widen search / exhausted -->
+      <div class="show-more-wrap" id="show-more-wrap" style="display:none"></div>
 
       <!-- FOOTER -->
       <div class="results-footer">
@@ -286,11 +296,13 @@ const KEY = 'quijo2026';
 })();
 
 // ── State ────────────────────────────────────────────────────
-let allJobs      = [];   // full scored list from backend
-let shownCount   = 3;    // how many cards currently visible
-let activeFilters= new Set();
-let currentCity  = 'Delhi';
+let allJobs       = [];   // full scored pool from backend (current search)
+let shownCount    = 3;    // how many cards currently visible
+let activeFilters = new Set();
+let currentCity   = 'Delhi';
 let lastResumeText = '';
+let totalMatched  = 0;    // real, live Adzuna count for this search
+let widenAttempted = false; // true once "widen search" has been used for the current search
 
 // ── Tab switching ────────────────────────────────────────────
 function switchTab(tab) {
@@ -376,7 +388,7 @@ async function submitPDF() {
       return;
     }
     lastResumeText = text;
-    await fetchAndRender(text, currentCity, '');
+    await fetchAndRender(text, currentCity, '', false);
   } catch(e) {
     stopLoading(); resetLoadingUI();
     showError('error-pdf', 'Something went wrong. Please try again.');
@@ -384,9 +396,16 @@ async function submitPDF() {
   }
 }
 
-// ── Core fetch + render (reused by submit, refine, show more) ─
-async function fetchAndRender(resumeText, city, roleOverride) {
-  const params = new URLSearchParams({ role: roleOverride || 'auto', city, resume_text: resumeText.slice(0, 4000), key: KEY });
+// ── Core fetch + render (reused by submit, refine, show more, widen) ─
+async function fetchAndRender(resumeText, city, roleOverride, widen) {
+  widen = !!widen;
+  const params = new URLSearchParams({
+    role: roleOverride || 'auto',
+    city,
+    resume_text: resumeText.slice(0, 4000),
+    widen: widen ? 'true' : 'false',
+    key: KEY
+  });
   const res    = await fetch(`${API}/test-match-text?${params}`);
   const data   = await res.json();
   stopLoading();
@@ -398,19 +417,31 @@ async function fetchAndRender(resumeText, city, roleOverride) {
     return;
   }
   if (data.status === 'no_jobs' || !data.jobs || data.jobs.length === 0) {
+    if (widen) {
+      // Widened search also came back empty — pool is exhausted even after widening
+      widenAttempted = true;
+      renderPoolStatus();
+      document.getElementById('btn-pdf').disabled = false;
+      return;
+    }
     showError('error-pdf', 'No matches found in this city. Try a different city or role.');
     resetLoadingUI();
     document.getElementById('btn-pdf').disabled = false;
     return;
   }
 
-  allJobs    = data.jobs;
-  shownCount = 3;
+  allJobs        = data.jobs;
+  totalMatched   = data.total_matched ?? data.jobs.length;
+  shownCount     = 3;
+  widenAttempted = widen; // false resets (fresh/refine search), true after a widen call
   activeFilters.clear();
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
 
   renderProfilePills(data.profile);
+  renderDemandSignal();
+  renderWeakMatchBanner();
   renderCards();
+  renderPoolStatus();
 
   // Pre-fill refine box with detected role
   if (data.profile && data.profile.role) {
@@ -420,16 +451,29 @@ async function fetchAndRender(resumeText, city, roleOverride) {
   document.getElementById('results-section').classList.add('visible');
 }
 
-// ── Refine search (role override) ────────────────────────────
+// ── Refine search (role override) — always a fresh search ───
 async function refineSearch() {
   const roleOverride = document.getElementById('refine-role').value.trim();
   if (!lastResumeText) { alert('Please upload a resume first.'); return; }
   startLoading();
   try {
-    await fetchAndRender(lastResumeText, currentCity, roleOverride);
+    await fetchAndRender(lastResumeText, currentCity, roleOverride, false);
   } catch(e) {
     stopLoading();
     alert('Re-search failed. Please try again.');
+  }
+}
+
+// ── Widen search — broadens geography + adds remote variant ──
+async function widenSearch() {
+  if (!lastResumeText) return;
+  const roleOverride = document.getElementById('refine-role').value.trim();
+  startLoading();
+  try {
+    await fetchAndRender(lastResumeText, currentCity, roleOverride, true);
+  } catch(e) {
+    stopLoading();
+    alert('Widen search failed. Please try again.');
   }
 }
 
@@ -440,6 +484,7 @@ function toggleFilter(key) {
   else { activeFilters.add(key); btn.classList.add('active'); }
   shownCount = 3;
   renderCards();
+  renderPoolStatus();
 }
 
 function applyFilters(jobs) {
@@ -453,10 +498,11 @@ function applyFilters(jobs) {
   });
 }
 
-// ── Show more ────────────────────────────────────────────────
+// ── Show more ("more like these" — same pool, zero extra AI cost) ─
 function showMore() {
   shownCount += 3;
   renderCards();
+  renderPoolStatus();
 }
 
 // ── Render cards ─────────────────────────────────────────────
@@ -468,7 +514,6 @@ function renderCards() {
 
   if (filtered.length === 0) {
     container.innerHTML = '<p style="padding:20px;color:#888;font-size:14px;text-align:center">No jobs match this filter. Try removing a filter.</p>';
-    document.getElementById('show-more-wrap').style.display = 'none';
     return;
   }
 
@@ -490,17 +535,60 @@ function renderCards() {
       <a class="apply-link" href="${job.url}" target="_blank" rel="noopener">Apply →</a>`;
     container.appendChild(card);
   });
+}
 
-  // Show more button
+// ── Render pool status: more like these / widen search / exhausted ─
+function renderPoolStatus() {
   const wrap = document.getElementById('show-more-wrap');
-  const btn  = document.getElementById('btn-show-more');
-  if (filtered.length > shownCount) {
-    wrap.style.display = 'block';
-    const remaining = filtered.length - shownCount;
-    btn.textContent = `Show ${Math.min(remaining, 3)} more matches ↓`;
-    btn.disabled = false;
-  } else {
+  const filtered = applyFilters(allJobs);
+
+  if (filtered.length === 0) {
     wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+
+  // More left in the current pool — "more like these", no extra AI cost
+  if (shownCount < filtered.length) {
+    const remaining = filtered.length - shownCount;
+    wrap.style.display = 'block';
+    wrap.innerHTML = `<button class="btn-show-more" onclick="showMore()">More like these ↓ (${Math.min(remaining, 3)} more)</button>`;
+    return;
+  }
+
+  // Current pool exhausted — offer to widen, once
+  if (!widenAttempted) {
+    wrap.style.display = 'block';
+    wrap.innerHTML = `
+      <p>📊 You've seen all ${filtered.length} matches for this exact search.</p>
+      <button class="btn-show-more btn-widen" onclick="widenSearch()">🔍 Widen search — broaden city + include remote</button>`;
+    return;
+  }
+
+  // Pool exhausted even after widening
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <p>You've seen all current openings for this search, even after widening it.<br>
+    Try a different role above ↑, or pick another city and search again.</p>`;
+}
+
+// ── Render demand signal — real, live Adzuna count ───────────
+function renderDemandSignal() {
+  const el = document.getElementById('demand-signal');
+  if (!el) return;
+  el.textContent = `📊 ${totalMatched} role${totalMatched === 1 ? '' : 's'} total matched this search`;
+}
+
+// ── Render weak-match banner (best match under 70%) ──────────
+function renderWeakMatchBanner() {
+  const el = document.getElementById('weak-match-banner');
+  if (!el) return;
+  const best = allJobs.length ? Math.max(...allJobs.map(j => j.score)) : 0;
+  if (best > 0 && best < 70) {
+    el.style.display = 'block';
+    el.innerHTML = `⚠️ Best match: <strong>${best}%</strong> — coverage for this role in your selected city is limited right now. Try a different city above, or override the role below 🔍`;
+  } else {
+    el.style.display = 'none';
   }
 }
 
@@ -514,14 +602,6 @@ function renderProfilePills(p) {
   if (p.years)  html += `<span class="pill">🕐 ${p.years} yrs</span>`;
   if (p.skills) html += `<span class="pill skills-pill">🎯 ${p.skills}</span>`;
   document.getElementById('profile-pills').innerHTML = html;
-}
-
-function renderResultsFromJSON(data) {
-  allJobs = data.jobs || [];
-  shownCount = 3;
-  renderProfilePills(data.profile);
-  renderCards();
-  document.getElementById('results-section').classList.add('visible');
 }
 
 // ── Submit LinkedIn (fallback) ────────────────────────────────
@@ -580,7 +660,12 @@ function showError(id, msg) {
 
 function resetForm() {
   allJobs = []; shownCount = 3; activeFilters.clear(); lastResumeText = '';
+  totalMatched = 0; widenAttempted = false;
   document.getElementById('results-section').classList.remove('visible');
+  document.getElementById('demand-signal').textContent = '';
+  document.getElementById('weak-match-banner').style.display = 'none';
+  document.getElementById('show-more-wrap').innerHTML = '';
+  document.getElementById('show-more-wrap').style.display = 'none';
   document.getElementById('tabs-bar').style.display  = 'grid';
   document.getElementById('panel-pdf').style.display = 'block';
   document.getElementById('panel-pdf').classList.add('active');
