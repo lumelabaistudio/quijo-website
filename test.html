@@ -131,10 +131,14 @@
   /* ── POOL STATUS (more like these / widen search / exhausted) ── */
   .show-more-wrap { padding: 4px 24px 16px; text-align: center; }
   .show-more-wrap p { font-size: 13px; color: #888; margin-bottom: 10px; line-height: 1.5; }
-  .btn-show-more { width: 100%; padding: 12px; background: var(--white); color: var(--black); border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+  .pool-status-row { display: flex; gap: 8px; }
+  .btn-show-more { flex: 1; width: 100%; padding: 12px; background: var(--white); color: var(--black); border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
   .btn-show-more:hover { border-color: var(--accent); color: var(--accent); }
   .btn-show-more:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-widen { border-color: var(--accent); color: var(--accent); }
+  @media (max-width: 480px) {
+    .pool-status-row { flex-direction: column; }
+  }
 
   /* ── RESULTS FOOTER ── */
   .results-footer { margin: 8px 24px 24px; padding: 14px 16px; background: #f8f6ff; border-radius: 10px; font-size: 13px; color: #555; text-align: center; line-height: 1.6; }
@@ -537,7 +541,10 @@ function renderCards() {
   });
 }
 
-// ── Render pool status: more like these / widen search / exhausted ─
+// ── Render pool status: more like these + widen search, side by side ─
+// Both are independent commands the user can reach for any time — not
+// a sequential unlock. Widen only disappears once it's actually been
+// used and came back exhausted too.
 function renderPoolStatus() {
   const wrap = document.getElementById('show-more-wrap');
   const filtered = applyFilters(allJobs);
@@ -548,28 +555,34 @@ function renderPoolStatus() {
     return;
   }
 
-  // More left in the current pool — "more like these", no extra AI cost
-  if (shownCount < filtered.length) {
-    const remaining = filtered.length - shownCount;
-    wrap.style.display = 'block';
-    wrap.innerHTML = `<button class="btn-show-more" onclick="showMore()">More like these ↓ (${Math.min(remaining, 3)} more)</button>`;
+  const morePending = shownCount < filtered.length;
+  const remaining   = filtered.length - shownCount;
+
+  const moreBtn  = morePending
+    ? `<button class="btn-show-more" onclick="showMore()">More like these ↓ (${Math.min(remaining, 3)} more)</button>`
+    : '';
+  const widenBtn = `<button class="btn-show-more btn-widen" onclick="widenSearch()">🔍 Widen search — city + remote</button>`;
+
+  wrap.style.display = 'block';
+
+  if (!morePending && widenAttempted) {
+    // Both this pool AND the widened pool are exhausted — nothing left to offer
+    wrap.innerHTML = `
+      <p>You've seen all current openings for this search, even after widening it.<br>
+      Try a different role above ↑, or pick another city and search again.</p>`;
     return;
   }
 
-  // Current pool exhausted — offer to widen, once
-  if (!widenAttempted) {
-    wrap.style.display = 'block';
+  if (!morePending) {
+    // This exact-search pool is exhausted, but widening hasn't been tried yet
     wrap.innerHTML = `
       <p>📊 You've seen all ${filtered.length} matches for this exact search.</p>
-      <button class="btn-show-more btn-widen" onclick="widenSearch()">🔍 Widen search — broaden city + include remote</button>`;
+      <div class="pool-status-row">${widenBtn}</div>`;
     return;
   }
 
-  // Pool exhausted even after widening
-  wrap.style.display = 'block';
-  wrap.innerHTML = `
-    <p>You've seen all current openings for this search, even after widening it.<br>
-    Try a different role above ↑, or pick another city and search again.</p>`;
+  // Pool still has more AND widen is always available alongside it
+  wrap.innerHTML = `<div class="pool-status-row">${moreBtn}${widenBtn}</div>`;
 }
 
 // ── Render demand signal — real, live Adzuna count ───────────
