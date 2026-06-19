@@ -486,6 +486,17 @@
       line-height: 1.6;
     }
 
+    .step-content .step-note {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--orange-dark);
+      background: var(--orange-light);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
     /* ── PRICING ── */
     .pricing-section {
       background: var(--gray-light);
@@ -1139,6 +1150,7 @@
           <div class="step-content">
             <h3>Send your resume</h3>
             <p>WhatsApp your resume PDF to Quijo. We parse it instantly with AI — your name, skills, experience, salary expectations.</p>
+            <span class="step-note">No resume handy? Just tell us your role &amp; years of experience instead.</span>
           </div>
         </div>
 
@@ -1235,6 +1247,14 @@
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a">Yes. Your resume is parsed and stored securely in our database. We never share it with employers or third parties. You can delete your data anytime by messaging "Delete my data" on WhatsApp.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Do I have to upload my resume?
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a">No. If you'd rather not share your resume, just tell Quijo your current role and years of experience on WhatsApp — we'll take it from there. Uploading a resume just gets you more accurate matches, since we can read your full skill set.</div>
         </div>
 
         <div class="faq-item">
